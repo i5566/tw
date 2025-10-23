@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>竹北遠百餐廳訂位與外帶服務</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 基本設置 - 優化為更現代的響應式設計 */
+        * {
+            box-sizing: border-box;
+        }
+        html {
+            /* scroll-padding-top: 60px; 註解掉，因為使用 JS 處理偏移以避免跳轉問題 */
+        }
+        body {
+            font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); /* 漸層背景，提升視覺深度 */
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* 容器 - 居中內容，添加側邊距 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 標題 - 優化為更吸引人的樣式 */
+        h1 {
+            text-align: center;
+            color: #5a7d9a;
+            margin: 20px 0 30px 0;
+            font-size: 2em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 輕微陰影 */
+            position: relative;
+        }
+        h1::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, #79a6d2, #a7d9b5);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        /* 版本資訊 - 優化位置與樣式 */
+        .version-info {
+            text-align: center;
+            color: #8899aa;
+            font-size: 0.85em;
+            margin: 0 0 20px 0;
+            font-style: italic;
+        }
+
+        /* 新增：樓層快速導覽選單樣式 */
+        .floor-nav {
+            position: sticky; /* 設定為黏貼定位 */
+            top: 0;           /* 當距離視窗頂部 0 時開始固定 */
+            z-index: 10;      /* 確保在樓層區塊之上 */
+            margin-bottom: 25px;
+            padding: 10px 0;
+            background-color: #ffffff; /* 白色背景 */
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 加強陰影，讓它看起來是浮動的 */
+            text-align: center;
+            margin-top: 0; 
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap; /* 允許換行 */
+            justify-content: center;
+            gap: 8px; /* 項目間距 */
+        }
+
+        .nav-item a {
+            display: block;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #4a6b8a;
+            font-weight: 700;
+            border-radius: 6px;
+            background-color: #eef1f5;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-item a:hover {
+            background-color: #79a6d2;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 新增：當前樓層高亮樣式 */
+        .nav-item a.active {
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 樓層區塊 (Group) 樣式 - 優化間距與陰影，新增動態網格布局 */
+        .floor-section {
+            margin: 30px 0; /* 增加樓層間距 */
+            padding: 20px;
+            border-radius: 16px; /* 更大圓角 */
+            border: 2px solid;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* 更柔和的陰影 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden; /* 防止內容溢出 */
+            display: flex; /* 新增：啟用 flex 布局以實現動態排版 */
+            flex-wrap: wrap; /* 允許換行 */
+            gap: 20px; /* 卡片間隙 */
+            min-height: 200px; /* 新增：確保短樓層有最小高度，避免檢測問題 */
+        }
+        .floor-section:hover {
+            transform: translateY(-5px); /* 懸停時輕微上浮 */
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* 樓層顏色循環定義 - 保持原色但微調透明度 */
+        .floor-group-1 {
+            border-color: #79a6d2;
+            background: linear-gradient(145deg, #eaf3f9, #d4e8f5); /* 輕微漸層 */
+        }
+        .floor-group-2 {
+            border-color: #a7d9b5;
+            background: linear-gradient(145deg, #f2fff4, #e8f9f0);
+        }
+        .floor-group-3 {
+            border-color: #e8a0a0;
+            background: linear-gradient(145deg, #fffafa, #ffe8e8);
+        }
+        .floor-group-4 {
+            border-color: #f5d680;
+            background: linear-gradient(145deg, #fffbed, #fff3d4);
+        }
+        .floor-group-5 {
+            border-color: #79a6d2;
+            background: linear-gradient(145deg, #eaf3f9, #d4e8f5);
+        }
+        .floor-group-6 {
+            border-color: #a7d9b5;
+            background: linear-gradient(145deg, #f2fff4, #e8f9f0);
+        }
+        .floor-group-7 {
+            border-color: #e8a0a0;
+            background: linear-gradient(145deg, #fffafa, #ffe8e8);
+        }
+
+        /* 樓層標題 - 優化為更立體的設計，跨列顯示 */
+        .floor-header {
+            background: linear-gradient(135deg, #5a7d9a, #4a6b8a); /* 漸層藍灰 */
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.4em;
+            font-weight: 700;
+            text-align: center;
+            border-radius: 10px;
+            margin: 0 0 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            order: -1; /* 確保標題在最前面 */
+            width: 100%; /* 全寬 */
+        }
+        .floor-header::before {
+            content: '🏢'; /* 添加樓層圖示 */
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        /* 餐廳卡片 - 優化為更緊湊且響應式的卡片，新增 flex 基礎 */
+        .restaurant-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06); /* 更細膩陰影 */
+            transition: all 0.3s ease;
+            border-left: 4px solid #ecf0f1; /* 左側邊框增添區分 */
+            flex: 1 1 300px; /* 動態：基礎寬度 300px，允許成長與收縮 */
+            min-width: 280px; /* 最小寬度，避免過窄 */
+        }
+        .restaurant-card:hover {
+            transform: translateX(5px); /* 懸停時輕微右移 */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border-left-color: #3498db; /* 變藍色邊框 */
+        }
+
+        .restaurant-name {
+            font-size: 1.3em; /* 略增字體大小 */
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .restaurant-name span.icon {
+            margin-right: 10px;
+            font-size: 1.3em; /* 圖示略大 */
+            flex-shrink: 0;
+        }
+
+        .contact {
+            color: #7f8c8d;
+            font-size: 0.95em;
+            margin-bottom: 15px; /* 增加底部間距 */
+            padding-left: 10px; /* 與圖示對齊 */
+            border-left: 3px solid #bdc3c7; /* 左側小邊框 */
+        }
+
+        /* 行動按鈕群組 - 改為水平布局以節省空間 */
+        .link-group {
+            display: flex;
+            flex-wrap: wrap; /* 允許換行 */
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .action-link {
+            flex: 1; /* 等寬分配 */
+            min-width: 140px; /* 最小寬度確保可讀 */
+            display: block;
+            padding: 12px 15px;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.95em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            white-space: nowrap; /* 防止文字換行 */
+        }
+        .action-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 按鈕顏色樣式 - 優化懸停效果 */
+        .action-link.waiting {
+            background-color: #e67e22;
+            color: white;
+        }
+        .action-link.waiting:hover {
+            background-color: #d35400;
+        }
+        .action-link.booking {
+            background-color: #3498db;
+            color: white;
+        }
+        .action-link.booking:hover {
+            background-color: #2980b9;
+        }
+        .action-link.official {
+            background-color: #9b59b6;
+            color: white;
+        }
+        .action-link.official:hover {
+            background-color: #8e44ad;
+        }
+        .action-link.takeout {
+            background-color: #27ae60;
+            color: white;
+        }
+        .action-link.takeout:hover {
+            background-color: #229954;
+        }
+        .action-link.phone-order {
+            background-color: #bdc3c7;
+            color: #2c3e50;
+        }
+        .action-link.phone-order:hover {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        /* 響應式設計 - 移動端優化，調整卡片布局 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.6em;
+            }
+            .floor-section {
+                margin: 20px 0;
+                padding: 15px;
+                flex-direction: column; /* 移動端強制垂直堆疊 */
+                gap: 15px;
+                min-height: 150px; /* 移動端最小高度調整 */
+            }
+            .floor-header {
+                font-size: 1.2em;
+                padding: 12px 15px;
+            }
+            .restaurant-card {
+                padding: 15px;
+                flex: none; /* 移除 flex 成長，固定全寬 */
+                min-width: auto;
+            }
+            .restaurant-name {
+                font-size: 1.2em;
+            }
+            .link-group {
+                flex-direction: column; /* 移動端垂直排列按鈕 */
+                gap: 8px;
+            }
+            .action-link {
+                min-width: auto;
+            }
+            .nav-list {
+                gap: 5px;
+                padding: 0 5px;
+            }
+            .nav-item a {
+                font-size: 0.8em;
+                padding: 6px 8px;
+            }
+        }
+
+        /* 中等螢幕：兩個卡片並排 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .restaurant-card {
+                flex: 1 1 45%; /* 兩個並排，留間隙 */
+            }
+        }
+
+        /* 大螢幕：三個或更多卡片並排 */
+        @media (min-width: 1025px) {
+            .container {
+                max-width: 1200px; /* 擴大容器以容納更多並排 */
+            }
+            .restaurant-card {
+                flex: 1 1 30%; /* 三個並排 */
+            }
+        }
+
+        /* 底部 - 添加版權或額外資訊（可選） */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #8899aa;
+            font-size: 0.8em;
+            border-top: 1px solid #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>竹北遠百餐廳一覽表</h1>
+        <div class="version-info">Ver 1.2.25.1023</div>
+        
+        <nav class="floor-nav">
+            <ul class="nav-list">
+                <li class="nav-item"><a href="#floor-b2">B2 樓</a></li>
+                <li class="nav-item"><a href="#floor-2f">2F 樓</a></li>
+                <li class="nav-item"><a href="#floor-3f">3F 樓</a></li>
+                <li class="nav-item"><a href="#floor-4f">4F 樓</a></li>
+                <li class="nav-item"><a href="#floor-6f">6F 樓</a></li>
+                <li class="nav-item"><a href="#floor-7f">7F 樓</a></li>
+                <li class="nav-item"><a href="#floor-8f">8F 樓</a></li>
+            </ul>
+        </nav>
+        
+        <div class="floor-section floor-group-1" id="floor-b2">
+            <div class="floor-header">B2 樓</div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍣</span>合點壽司</div>
+                <div class="contact">電話: 03-6683455</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-LO1_FKEyjzwWiKs2N87:inline-live-2a466/-MtbAg34Ayj46JaZ5UAG/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-LO1_FKEyjzwWiKs2N87:inline-live-2a466/-MtbAg34Ayj46JaZ5UAG" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-LO1_FKEyjzwWiKs2N87:inline-live-2a466/-MtbAg34Ayj46JaZ5UAG" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🇭🇰</span>檀島香港茶餐廳</div>
+                <div class="contact">電話: 03-6106659</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KmWQEQiBgl5GD1F3LKB:inline-live-2a466/-MrziszfReVb_aRucRNL/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KmWQEQiBgl5GD1F3LKB:inline-live-2a466/-MrziszfReVb_aRucRNL" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KmWQEQiBgl5GD1F3LKB:inline-live-2a466/-MrziszfReVb_aRucRNL" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥤</span>翰林茶館</div>
+                <div class="contact">電話: 03-5580679</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-LUmmdG3qXw8BKa113bV:inline-live-2a466/-MqAG4eKaPso18ziNgzi/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-LUmmdG3qXw8BKa113bV:inline-live-2a466/-MqAG4eKaPso18ziNgzi" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-LUmmdG3qXw8BKa113bV:inline-live-2a466/-MqAG4eKaPso18ziNgzi" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="floor-section floor-group-2" id="floor-2f">
+            <div class="floor-header">2F 樓</div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥟</span>新葡苑</div>
+                <div class="contact">電話: 03-6586642 / 03-6586648</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KsqbDxNyqIP5I_7iqXn/-Ms-9WAD_LaixcOrJtn8/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KsqbDxNyqIP5I_7iqXn/-Ms-9WAD_LaixcOrJtn8" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KsqbDxNyqIP5I_7iqXn/-Ms-9WAD_LaixcOrJtn8" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="floor-section floor-group-3" id="floor-3f">
+            <div class="floor-header">3F 樓</div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥞</span>Woosa パンケーキ 屋莎鬆餅屋</div>
+                <div class="contact">電話: 03-6673562</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-L36k4RLcQz0pL4FOIT7:inline-live-woosa/-MsdSwnjPO9zalF8gaCq/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-L36k4RLcQz0pL4FOIT7:inline-live-woosa/-MsdSwnjPO9zalF8gaCq" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-L36k4RLcQz0pL4FOIT7:inline-live-woosa/-MsdSwnjPO9zalF8gaCq" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="floor-section floor-group-4" id="floor-4f">
+            <div class="floor-header">4F 樓</div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍔</span>HOOTERS</div>
+                <div class="contact">電話: 03-5503978</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-LMkdkVLni9d6UirM8AO:inline-live-2a466/-Ms8FSksg_tNxsfY-fG8/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-LMkdkVLni9d6UirM8AO:inline-live-2a466/-Ms8FSksg_tNxsfY-fG8" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-LMkdkVLni9d6UirM8AO:inline-live-2a466/-Ms8FSksg_tNxsfY-fG8" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="floor-section floor-group-5" id="floor-6f">
+            <div class="floor-header">6F 樓</div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍗</span>21 世紀風味館</div>
+                <div class="contact">電話: 03-5505021</div>
+                <div class="link-group">
+                    <a class="action-link phone-order" href="tel:035505021">電話訂餐</a>
+                </div>
+            </div>
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍚</span>吉品初筵港式茶居</div>
+                <div class="contact">電話: 03-6676455</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-MKbqrpf9G5UqX--hqm6:inline-live-1/-MruFsrL4AguAZ6dLTn5/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-MKbqrpf9G5UqX--hqm6:inline-live-1/-MruFsrL4AguAZ6dLTn5" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-MKbqrpf9G5UqX--hqm6:inline-live-1/-MruFsrL4AguAZ6dLTn5" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🌶️</span>開飯川食堂</div>
+                <div class="contact">電話: 03-6579391</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-LDirX5QftbTKbi_hvZb/-MsY-4LsoT9yMIH3T5ab/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-LDirX5QftbTKbi_hvZb/-MsY-4LsoT9yMIH3T5ab" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-LDirX5QftbTKbi_hvZb/-MsY-4LsoT9yMIH3T5ab" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥩</span>黑毛屋</div>
+                <div class="contact">電話: 03-5505779</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-Ksqd75YotfnrUQlatpE/-MrLSmfFpdJArh8TNaLA/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-Ksqd75YotfnrUQlatpE/-MrLSmfFpdJArh8TNaLA" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-Ksqd75YotfnrUQlatpE/-MrLSmfFpdJArh8TNaLA" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="floor-section floor-group-6" id="floor-7f">
+            <div class="floor-header">7F 樓</div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍲</span>MO-MO-PARADISE</div>
+                <div class="contact">電話: 03-5506479</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KlcGro3QpVV0OQ_gRcI:inline-live-humaxasia/-Mr_ezq5IU8j22CWYPS5/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KlcGro3QpVV0OQ_gRcI:inline-live-humaxasia/-Mr_ezq5IU8j22CWYPS5" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KlcGro3QpVV0OQ_gRcI:inline-live-humaxasia/-Mr_ezq5IU8j22CWYPS5" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🦆</span>上菜。片皮鴨專賣店</div>
+                <div class="contact">電話: 03-6587615</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-MJloksQFvxxEehtWcOM:inline-live-1/-MrevBQrnvq4AtfXFRX-/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-MJloksQFvxxEehtWcOM:inline-live-1/-MrevBQrnvq4AtfXFRX-" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-MJloksQFvxxEehtWcOM:inline-live-1/-MrevBQrnvq4AtfXFRX-" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🔥</span>乾杯燒肉居酒屋</div>
+                <div class="contact">電話: 03-5501217</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-L-e46qoWlxHZNex-KQ8/-MrLLpaqdqOxPJYTuiFX/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-L-e46qoWlxHZNex-KQ8/-MrLLpaqdqOxPJYTuiFX" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-L-e46qoWlxHZNex-KQ8/-MrLLpaqdqOxPJYTuiFX" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍤</span>勝博殿</div>
+                <div class="contact">電話: 03-6105313</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KuUwaEhVKljatiaBnAM:inline-live-2a466/-Mqshv5tTz1GxrhDBniZ/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KuUwaEhVKljatiaBnAM:inline-live-2a466/-Mqshv5tTz1GxrhDBniZ" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KuUwaEhVKljatiaBnAM:inline-live-2a466/-Mqshv5tTz1GxrhDBniZ" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍤</span>吉 天麩羅</div>
+                <div class="contact">電話: 03-5506499</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KysgCYTGoOWtGrdXo4f/-Mr_hVgOFS8bgh6SOvtA/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KysgCYTGoOWtGrdXo4f/-Mr_hVgOFS8bgh6SOvtA" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KysgCYTGoOWtGrdXo4f/-Mr_hVgOFS8bgh6SOvtA" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥢</span>時時香 SHANN RICE BAR</div>
+                <div class="contact">電話: 03-6580648</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KaC6OOcN_ucM-BaOa4g:inline-live-thaitown/-Mrf8z6efYvZ_r-0Xr1-/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KaC6OOcN_ucM-BaOa4g:inline-live-thaitown/-Mrf8z6efYvZ_r-0Xr1-" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KaC6OOcN_ucM-BaOa4g:inline-live-thaitown/-Mrf8z6efYvZ_r-0Xr1-" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍟</span>樂子美式餐廳</div>
+                <div class="contact">電話: 03-5502251</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KJJSvnMqP2ZECa6JwWY/-MrzwsNpMgB3YUv2gaqw/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KJJSvnMqP2ZECa6JwWY/-MrzwsNpMgB3YUv2gaqw" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KJJSvnMqP2ZECa6JwWY/-MrzwsNpMgB3YUv2gaqw" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥢</span>涓豆腐</div>
+                <div class="contact">電話: 03-5509696</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KSGa4AkgJGkWgyfbS9C/-Mt5ve-gxTsueTcIbgEd/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KSGa4AkgJGkWgyfbS9C/-Mt5ve-gxTsueTcIbgEd" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KSGa4AkgJGkWgyfbS9C/-Mt5ve-gxTsueTcIbgEd" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥩</span>涮乃葉日式涮涮鍋</div>
+                <div class="contact">電話: 03-6581387</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-LPimPrzunBVFBi0ckJB:inline-live-2a466/-Mruf10MVIEq8PfdZ2pJ/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-LPimPrzunBVFBi0ckJB:inline-live-2a466/-Mruf10MVIEq8PfdZ2pJ" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-LPimPrzunBVFBi0ckJB:inline-live-2a466/-Mruf10MVIEq8PfdZ2pJ" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥢</span>添好運</div>
+                <div class="contact">電話: 03-5509978</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-KsqdgucSUzcmpa7IFO4/-Ms8XavWnejZmDExSIAX/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-KsqdgucSUzcmpa7IFO4/-Ms8XavWnejZmDExSIAX" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-KsqdgucSUzcmpa7IFO4/-Ms8XavWnejZmDExSIAX" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍱</span>藍屋日本料理</div>
+                <div class="contact">電話: 03-6587116</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-L3TwcJm5cGrkRqggtUM/-MruekFg_hwY3TfxP1Zt/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-L3TwcJm5cGrkRqggtUM/-MruekFg_hwY3TfxP1Zt" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-L3TwcJm5cGrkRqggtUM/-MruekFg_hwY3TfxP1Zt" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍝</span>貝里尼</div>
+                <div class="contact">電話: 03-5506489</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-Kjs-HcWr46kJ4XVkjtK:inline-live-humaxasia/-Mr_fdInn0UuH0kOvSYo/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-Kjs-HcWr46kJ4XVkjtK:inline-live-humaxasia/-Mr_fdInn0UuH0kOvSYo" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-Kjs-HcWr46kJ4XVkjtK:inline-live-humaxasia/-Mr_fdInn0UuH0kOvSYo" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🌶️</span>饗泰多</div>
+                <div class="contact">電話: 03-5500989</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-MVo2UOJhy1cdTfSDEnZ:inline-live-2/-MsY0njRGRfhiajt2uKL/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-MVo2UOJhy1cdTfSDEnZ:inline-live-2/-MsY0njRGRfhiajt2uKL" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-MVo2UOJhy1cdTfSDEnZ:inline-live-2/-MsY0njRGRfhiajt2uKL" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="floor-section floor-group-7" id="floor-8f">
+            <div class="floor-header">8F 樓</div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">♨️</span>小福利</div>
+                <div class="contact">電話: 03-6682672</div>
+                <div class="link-group">
+                    <a class="action-link official" href="https://www.feastogether.com.tw/booking/Xiaofree" target="_blank">官網訂位 (指定日期)</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🍱</span>旭集 和食集錦</div>
+                <div class="contact">電話: 03-5508191</div>
+                <div class="link-group">
+                    <a class="action-link official" href="https://www.feastogether.com.tw/booking/Sunrise" target="_blank">官網訂位 (指定日期)</a>
+                </div>
+            </div>
+            
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥦</span>果然匯</div>
+                <div class="contact">電話: 03-5508883</div>
+                <div class="link-group">
+                    <a class="action-link official" href="https://www.feastogether.com.tw/booking/Fruitfulfood" target="_blank">官網訂位 (指定日期)</a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 餐廳服務一覽表 | 更新日期: 2025-10-22</p>
+        </footer>
+    </div>
+
+    <script>
+        // 監聽滾動事件以檢測當前可見的樓層 - 改進邏輯以處理短樓層
+        window.addEventListener('scroll', () => {
+            const navLinks = document.querySelectorAll('.nav-item a');
+            const floorSections = document.querySelectorAll('.floor-section');
+            let currentFloor = '';
+            let minDistance = Infinity;
+
+            // 找到距離視窗頂部最近的可見樓層
+            floorSections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                // 只考慮部分或全部可見的樓層 (bottom > 0 且 top < window.innerHeight)
+                if (rect.bottom > 0 && rect.top < window.innerHeight) {
+                    const distance = Math.abs(rect.top);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        currentFloor = section.getAttribute('id');
+                    }
+                }
+            });
+
+            // 更新導航欄的高亮狀態
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').substring(1) === currentFloor) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // 點擊導航連結時，處理平滑滾動並正確偏移，避免跳轉問題
+        document.querySelectorAll('.nav-item a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    const navHeight = document.querySelector('.floor-nav').offsetHeight;
+                    const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight - 50; // 增加緩衝到50px
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+                // 設定 active 狀態
+                document.querySelectorAll('.nav-item a').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
