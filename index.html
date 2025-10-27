@@ -11,7 +11,7 @@
             box-sizing: border-box;
         }
         html {
-            /* scroll-padding-top: 60px; 註解掉，因為使用 JS 處理偏移以避免跳轉問題 */
+            scroll-padding-top: 60px; /* 自動偏移 sticky nav 高度，讓錨點定位在 nav 下方 */
         }
         body {
             font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
@@ -60,15 +60,20 @@
 
         /* 新增：樓層快速導覽選單樣式 */
         .floor-nav {
+            /* === 關鍵：STICKY 固定設定 START === */
             position: sticky; /* 設定為黏貼定位 */
             top: 0;           /* 當距離視窗頂部 0 時開始固定 */
             z-index: 10;      /* 確保在樓層區塊之上 */
+            /* ================================== */
+            
             margin-bottom: 25px;
             padding: 10px 0;
             background-color: #ffffff; /* 白色背景 */
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 加強陰影，讓它看起來是浮動的 */
             text-align: center;
+            
+            /* 調整上邊界為 0，確保黏貼時無縫銜接 */
             margin-top: 0; 
         }
 
@@ -99,13 +104,6 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* 新增：當前樓層高亮樣式 */
-        .nav-item a.active {
-            background-color: #3498db;
-            color: white;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        }
-
         /* 樓層區塊 (Group) 樣式 - 優化間距與陰影，新增動態網格布局 */
         .floor-section {
             margin: 30px 0; /* 增加樓層間距 */
@@ -119,7 +117,7 @@
             display: flex; /* 新增：啟用 flex 布局以實現動態排版 */
             flex-wrap: wrap; /* 允許換行 */
             gap: 20px; /* 卡片間隙 */
-            min-height: 200px; /* 新增：確保短樓層有最小高度，避免檢測問題 */
+            /* 移除負邊距與額外 padding-top，使用 scroll-padding-top 處理錨點偏移 */
         }
         .floor-section:hover {
             transform: translateY(-5px); /* 懸停時輕微上浮 */
@@ -181,6 +179,7 @@
         .restaurant-card {
             background-color: #ffffff;
             border-radius: 12px;
+            /* margin-bottom: 20px; 移除，改用 gap */
             padding: 20px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06); /* 更細膩陰影 */
             transition: all 0.3s ease;
@@ -297,7 +296,6 @@
                 padding: 15px;
                 flex-direction: column; /* 移動端強制垂直堆疊 */
                 gap: 15px;
-                min-height: 150px; /* 移動端最小高度調整 */
             }
             .floor-header {
                 font-size: 1.2em;
@@ -318,6 +316,7 @@
             .action-link {
                 min-width: auto;
             }
+            /* 新增：移動端導覽列樣式調整 */
             .nav-list {
                 gap: 5px;
                 padding: 0 5px;
@@ -358,8 +357,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>竹北遠百餐廳一覽表</h1>
-        <div class="version-info">Ver 1.2.25.1023</div>
+        <h1>餐廳服務一覽表</h1>
+        <div class="version-info">Ver 1.0.25.1027</div>
         
         <nav class="floor-nav">
             <ul class="nav-list">
@@ -622,6 +621,24 @@
                     <a class="action-link takeout" href="https://inline.app/order/-MVo2UOJhy1cdTfSDEnZ:inline-live-2/-MsY0njRGRfhiajt2uKL" target="_blank">外帶點餐</a>
                 </div>
             </div>
+
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🥟</span>四川吳抄手</div>
+                <div class="contact">電話: 03-5506248</div>
+                <div class="link-group">
+                    <a class="action-link waiting" href="https://inline.app/-NVc0ujOshSJ8X6m16Lh:inline-live-3/-NVc2e1DsvNQtyHxeCTS/waiting" target="_blank">當日訂位 (候位)</a>
+                    <a class="action-link booking" href="https://inline.app/booking/-NVc0ujOshSJ8X6m16Lh:inline-live-3/-NVc2e1DsvNQtyHxeCTS" target="_blank">指定日期 (預訂)</a>
+                    <a class="action-link takeout" href="https://inline.app/order/-NVc0ujOshSJ8X6m16Lh:inline-live-3/-NVc2e1DsvNQtyHxeCTS" target="_blank">外帶點餐</a>
+                </div>
+            </div>
+
+            <div class="restaurant-card">
+                <div class="restaurant-name"><span class="icon">🐟</span>蜀川香酸菜魚</div>
+                <div class="contact">電話: 03-6688918</div>
+                <div class="link-group">
+                    <a class="action-link phone-order" href="tel:036688918">電話訂餐</a>
+                </div>
+            </div>
         </div>
 
         <div class="floor-section floor-group-7" id="floor-8f">
@@ -653,59 +670,8 @@
         </div>
 
         <footer>
-            <p>&copy; 2025 餐廳服務一覽表 | 更新日期: 2025-10-22</p>
+            <p>&copy; 2025 餐廳服務一覽表 | 更新日期: 2025-10-27</p>
         </footer>
     </div>
-
-    <script>
-        // 監聽滾動事件以檢測當前可見的樓層 - 改進邏輯以處理短樓層
-        window.addEventListener('scroll', () => {
-            const navLinks = document.querySelectorAll('.nav-item a');
-            const floorSections = document.querySelectorAll('.floor-section');
-            let currentFloor = '';
-            let minDistance = Infinity;
-
-            // 找到距離視窗頂部最近的可見樓層
-            floorSections.forEach(section => {
-                const rect = section.getBoundingClientRect();
-                // 只考慮部分或全部可見的樓層 (bottom > 0 且 top < window.innerHeight)
-                if (rect.bottom > 0 && rect.top < window.innerHeight) {
-                    const distance = Math.abs(rect.top);
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        currentFloor = section.getAttribute('id');
-                    }
-                }
-            });
-
-            // 更新導航欄的高亮狀態
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href').substring(1) === currentFloor) {
-                    link.classList.add('active');
-                }
-            });
-        });
-
-        // 點擊導航連結時，處理平滑滾動並正確偏移，避免跳轉問題
-        document.querySelectorAll('.nav-item a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    const navHeight = document.querySelector('.floor-nav').offsetHeight;
-                    const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight - 50; // 增加緩衝到50px
-                    window.scrollTo({
-                        top: offsetTop,
-                        behavior: 'smooth'
-                    });
-                }
-                // 設定 active 狀態
-                document.querySelectorAll('.nav-item a').forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-            });
-        });
-    </script>
 </body>
 </html>
