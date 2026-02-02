@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 舊照片修復指南 - 使用 Google Gemini</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: "Microsoft JhengHei", sans-serif; }
+        .hero-section { background: linear-gradient(135deg, #1a73e8, #8ab4f8); color: white; padding: 60px 0; border-radius: 0 0 2rem 2rem; }
+        .step-card { border: none; border-radius: 15px; transition: transform 0.3s; height: 100%; }
+        .step-card:hover { transform: translateY(-5px); }
+        .prompt-box { background-color: #ffffff; border-left: 5px solid #1a73e8; border-radius: 8px; }
+        .copy-btn { cursor: pointer; }
+        .example-img { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; height: auto; }
+        code { color: #d63384; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+
+<header class="hero-section text-center mb-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold">AI 舊照片修復指南</h1>
+        <p class="lead">只需簡單四個步驟，讓模糊的舊照片重現極致清晰</p>
+    </div>
+</header>
+
+<div class="container mb-5">
+    <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+            <h2 class="mb-4 d-flex align-items-center">
+                <span class="badge bg-primary me-2">Step</span> 如何自行修復照片
+            </h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card step-card shadow-sm p-3">
+                        <h5 class="fw-bold">1. 準備帳號</h5>
+                        <p class="text-muted mb-0">準備一組免費的 Google 帳號即可開始使用。</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card step-card shadow-sm p-3">
+                        <h5 class="fw-bold">2. 開啟 Gemini</h5>
+                        <p class="text-muted mb-0">使用電腦瀏覽器造訪網頁版或安裝手機端 「Google Gemini」 App。</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card step-card shadow-sm p-3">
+                        <h5 class="fw-bold">3. 上傳與設定</h5>
+                        <p class="text-muted mb-0">上傳照片並勾選 <strong>「圖像」 + 「Pro」</strong>。請注意每日約有三張專業修圖額度。</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card step-card shadow-sm p-3">
+                        <h5 class="fw-bold">4. 貼入提示詞</h5>
+                        <p class="text-muted mb-0">複製下方適合的風格提示詞發送，也可在後方自行補充修改細節。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="text-center">
+                <p class="text-muted small mb-2">介面操作範例</p>
+                <img src="FixPic_Demo.jpg" alt="Gemini 操作介面" class="example-img">
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <h2 class="mb-4 text-center fw-bold">選擇您的修復風格 (Prompt)</h2>
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card prompt-box shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-primary">風格 1：Canon EOS R6 Mark II 專業人像</h5>
+                    <p class="card-text"><code>Restore this old photo into a professional portrait of DSLR-quality colour and detail, using an advanced upscaling algorithm comparable to the results from the Canon EOS R6 Mark II. Ensure the restored image looks natural, retains exact facial features, has excellent clarity and no noise. As if taken right now with Canon EOS R6 Mark II.</code></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card prompt-box shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-primary">風格 2：Canon EOS R5 高清質感</h5>
+                    <p class="card-text"><code>Restore this old photo to match the image quality of the Canon EOS R5. Please make sure the restored photo maintains the look of the source photo; it should be realistic, with no grain or noise, as if it were taken today with a professional camera like the Canon EOS R5.</code></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card prompt-box shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-primary">風格 3：Nikon D850 8K 極致寫實</h5>
+                    <p class="card-text"><code>Edit this photo into a professional portrait of very high quality and colour, comparable to the results of Nikon D850. Remove grains, cracks and noise. Produce ultra-realistic image, 8K Ultra HD.</code></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card prompt-box shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-primary">風格 4：iPhone 17 現代隨拍</h5>
+                    <p class="card-text"><code>Edit this photo to make it look like it was clicked by iPhone 17. Remove grains, cracks and noise. Balance light, produce ultra-realistic image, 4K Ultra HD.</code></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card prompt-box shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-primary">風格 5：Samsung S25 Ultra 旗艦濾鏡</h5>
+                    <p class="card-text"><code>Restore this old photo to make it look like it was clicked with a Samsung Galaxy S25 Ultra. Remove grains, cracks and noise. Produce ultra-realistic images with exact facial appearance, apply realistic skin filters, 4K Ultra HD.</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="py-4 text-center text-muted border-top">
+    <div class="container">
+        <p>© 2026 AI 影像教學服務 - 讓回憶永不褪色</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
